@@ -9,42 +9,38 @@ export class AiService {
   private model: any = null;
 
   constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('GOOGLE_API_KEY');
+    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
     if (apiKey) {
       this.genAI = new GoogleGenerativeAI(apiKey);
       this.model = this.genAI.getGenerativeModel({
         model: 'gemini-2.0-flash',
         systemInstruction: `
-          Tu es l'assistant de support intelligent de FasoTransport, une plateforme de gestion de transport de bus au Burkina Faso.
-          Ton rôle est d'aider les voyageurs avec leurs préoccupations concernant les horaires, les tarifs, les réservations et les problèmes techniques.
-          
-          Directives :
-          1. Sois toujours poli, professionnel et aidant.
-          2. Réponds principalement en français.
-          3. Utilise les informations de contexte fournies (horaires, trajets) pour répondre précisément. 
-          4. Si une information n'est pas dans le contexte, dis-le poliment et suggère de contacter le support humain.
-          5. Garde tes réponses concises et pertinentes.
-          
-          Contexte de l'entreprise :
-          - Nom : FasoTransport
-          - Services : Réservation de tickets de bus, consultation d'horaires en temps réel.
+          Tu es l'assistant de support intelligent de FasoTransport.
+          Ton role est d'aider les voyageurs avec leurs preoccupations
+          concernant les horaires, les tarifs, les reservations et les problemes techniques.
+          Reponds principalement en francais. Sois poli et professionnel.
         `,
       });
     } else {
-      this.logger.warn('GOOGLE_API_KEY is not defined. AI Chat will not work.');
+      this.logger.warn('GEMINI_API_KEY is not defined. AI Chat will not work.');
     }
   }
 
-  async generateResponse(userMessage: string, history: { role: string; content: string }[] = [], context: string = ''): Promise<string> {
+  async generateResponse(
+    userMessage: string,
+    history: { role: string; content: string }[] = [],
+    context: string = '',
+  ): Promise<string> {
     if (!this.model) {
-      return this.buildFallbackResponse(context);
+      return "L'assistant IA n'est pas disponible pour le moment.";
     }
-
     try {
-      const fullMessage = context ? `Voici les informations actuelles sur les horaires et trajets :\n${context}\n\nQuestion de l'utilisateur : ${userMessage}` : userMessage;
+      const fullMessage = context
+        ? `Informations disponibles :\n${context}\n\nQuestion : ${userMessage}`
+        : userMessage;
 
       const chat = this.model.startChat({
-        history: history.map(h => ({
+        history: history.map((h) => ({
           role: h.role === 'PASSENGER' ? 'user' : 'model',
           parts: [{ text: h.content }],
         })),
@@ -55,21 +51,7 @@ export class AiService {
       return response.text();
     } catch (error) {
       this.logger.error('Error generating AI response:', error);
-      return this.buildFallbackResponse(context);
+      return "Une erreur s'est produite. Veuillez reessayer.";
     }
-  }
-
-  private buildFallbackResponse(context: string): string {
-    const lines = context
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line.startsWith('- '))
-      .slice(0, 3);
-
-    if (lines.length === 0) {
-      return "Je n'arrive pas à joindre l'assistant IA pour le moment. Un agent humain peut vous aider, ou vous pouvez essayer de préciser la ville de départ, la destination ou l'horaire souhaité.";
-    }
-
-    return `Je n'arrive pas à joindre l'assistant IA pour le moment, mais voici quelques trajets disponibles :\n${lines.join('\n')}\n\nSi vous voulez, je peux aussi vous aider à chercher un trajet précis.`;
   }
 }
