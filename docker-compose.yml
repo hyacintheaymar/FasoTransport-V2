@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: fasotransport
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fasotransport-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/fasotransport
+      JWT_SECRET: your-secret-key-change-me
+      JWT_EXPIRATION: 3600
+    depends_on:
+      - postgres
+    networks:
+      - fasotransport-network
+    restart: unless-stopped
+    command: npm start
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+    depends_on:
+      - backend
+    networks:
+      - fasotransport-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  fasotransport-network:
+    driver: bridge
