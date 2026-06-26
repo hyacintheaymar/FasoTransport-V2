@@ -113,9 +113,9 @@ export default function BusesPage() {
         ) : (
           <div className="grid">
             {buses.map((bus) => (
-              <div className="card relative" key={bus._id}>
+              <div className="card relative" key={bus.id}>
                 <button 
-                  onClick={() => handleDelete(bus._id)} 
+                  onClick={() => handleDelete(bus.id)} 
                   className="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
                   title="Supprimer le bus"
                 >

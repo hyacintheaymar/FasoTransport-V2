@@ -8,7 +8,7 @@ import DashboardLayout from '../../components/DashboardLayout';
 import { MessageSquare, CheckCircle } from 'lucide-react';
 
 interface ChatMessage {
-  _id: string;
+  id: string;
   message: string;
   userName: string;
   senderType: 'PASSENGER' | 'SUPPORT';
@@ -52,7 +52,7 @@ export default function ChatAdminPage() {
 
     try {
       const response = await authPost(
-        `/chat/reply/${selectedMessage._id}`,
+        `/chat/reply/${selectedMessage.id}`,
         { reply: replyText },
       );
       if (response.success) {
@@ -88,10 +88,10 @@ export default function ChatAdminPage() {
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {messages.map((msg) => (
                     <div
-                      key={msg._id}
+                      key={msg.id}
                       onClick={() => setSelectedMessage(msg)}
                       className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedMessage?._id === msg._id
+                        selectedMessage?.id === msg.id
                           ? 'bg-brand-orange/10 border-brand-orange'
                           : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
                       }`}

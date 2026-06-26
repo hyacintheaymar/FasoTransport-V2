@@ -9,7 +9,7 @@ import Pill from '../../components/ui/Pill';
 import { Ticket } from 'lucide-react';
 
 type BookingModel = {
-  _id: string;
+  id: string;
   bookingCode: string;
   seatNumber: number;
   amount: number;
@@ -99,7 +99,7 @@ export default function BookingsPage() {
               </thead>
               <tbody>
                 {bookings.map((booking) => (
-                  <tr key={booking._id}>
+                  <tr key={booking.id}>
                     <td className="td">
                       <strong>{booking.bookingCode}</strong>
                     </td>

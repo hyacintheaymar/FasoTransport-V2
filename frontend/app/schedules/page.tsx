@@ -66,7 +66,7 @@ export default function SchedulesPage() {
   });
 
   const stats = useMemo(() => {
-    const assigned = schedules.filter((s) => !!s.agentId).length;
+    const assigned = schedules.filter((s) => !!s.agent || !!s.agentName).length;
     const seats = schedules.reduce((acc, s) => acc + Number(s.availableSeats || 0), 0);
     return {
       total: schedules.length,
